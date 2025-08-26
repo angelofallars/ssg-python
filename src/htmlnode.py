@@ -1,13 +1,18 @@
-from dataclasses import dataclass
 from typing import Literal, override
 
 
-@dataclass(slots=True)
 class HTMLNode:
-    tag: "TagType | None" = None
-    value: str | None = None
-    children: "list[HTMLNode] | None" = None
-    props: dict[str, str] | None = None
+    def __init__(
+        self,
+        tag: "TagType | None" = None,
+        value: str | None = None,
+        children: "list[HTMLNode] | None" = None,
+        props: dict[str, str] | None = None,
+    ) -> None:
+        self.tag: "TagType | None" = tag
+        self.value: str | None = value
+        self.children: "list[HTMLNode] | None" = children
+        self.props: dict[str, str] | None = props
 
     def to_html(self) -> str:
         raise NotImplementedError
@@ -34,6 +39,27 @@ class HTMLNode:
 
         fields_str = (f"{k}={v}" for k, v in fields.items())
         return f"{self.__class__.__name__}({', '.join(fields_str)})"
+
+
+class LeafNode(HTMLNode):
+    def __init__(
+        self,
+        tag: "TagType | None",
+        value: str,
+        props: dict[str, str] | None = None,
+    ) -> None:
+        super().__init__(tag, value, None, props)
+
+    @override
+    def to_html(self) -> str:
+        if self.value is None:
+            msg = f"Leaf node '{self}' has no value"
+            raise ValueError(msg)
+
+        if self.tag is None:
+            return self.value
+
+        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
 
 
 type TagType = Literal[

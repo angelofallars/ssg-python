@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 
 
 class TestTextNode(unittest.TestCase):
@@ -34,6 +34,37 @@ class TestTextNode(unittest.TestCase):
 
         for node, expected in test_cases:
             actual = node.props_to_html()
+            self.assertEqual(actual, expected)
+
+    def test_leaf_to_html_p(self):
+        test_cases: list[tuple[HTMLNode, str]] = [
+            (
+                LeafNode(
+                    "b",
+                    "Hello, world!",
+                ),
+                 "<b>Hello, world!</b>",
+            ),
+            (
+                LeafNode(
+                    "a",
+                    "A link!",
+                    {"href": "https://www.google.com", "target":"blank"}
+                ),
+                '<a href="https://www.google.com" target="blank">A link!</a>',
+            ),
+            (
+                LeafNode(
+                    "code",
+                    'print("hello world")',
+                    {"style": "code-block"}
+                ),
+                '<code style="code-block">print("hello world")</code>',
+            ),
+        ]
+
+        for node, expected in test_cases:
+            actual = node.to_html()
             self.assertEqual(actual, expected)
 
 if __name__ == "__main__":
