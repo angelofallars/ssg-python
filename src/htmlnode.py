@@ -56,10 +56,32 @@ class LeafNode(HTMLNode):
             msg = f"Leaf node '{self}' has no value"
             raise ValueError(msg)
 
-        if self.tag is None:
-            return self.value
-
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+
+
+class ParentNode(HTMLNode):
+    def __init__(
+        self,
+        tag: "TagType",
+        children: list[HTMLNode],
+        props: dict[str, str] | None = None,
+    ) -> None:
+        super().__init__(tag, None, children, props)
+
+    @override
+    def to_html(self) -> str:
+        if self.tag is None:
+            msg = f"Parent node '{self}' has no tag"
+            raise ValueError(msg)
+
+        if self.children is None:
+            msg = f"Parent node '{self}' has no children"
+            raise ValueError(msg)
+
+
+        children = "".join(child.to_html() for child in self.children)
+
+        return f"<{self.tag}{self.props_to_html()}>{children}</{self.tag}>"
 
 
 type TagType = Literal[
