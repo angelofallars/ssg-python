@@ -3,6 +3,7 @@ import unittest
 
 from textnode import (
     TextNode,
+    markdown_to_blocks,
     split_nodes_delimiter,
     split_nodes_image,
     split_nodes_link,
@@ -277,16 +278,26 @@ class TestTextNode(unittest.TestCase):
                     TextNode(" with ", "Plain"),
                     TextNode("templ", "Link", "https://templ.guide/"),
                     TextNode(" components.", "Plain"),
-                ]
+                ],
             ),
             (
                 "If you have an element that is polling a URL and you want it to stop, use the `htmx.StatusStopPolling` 286 status code in a response to cancel the polling. [HTMX documentation reference](https://htmx.org/docs/#polling)",
                 [
-                    TextNode("If you have an element that is polling a URL and you want it to stop, use the ", "Plain"),
+                    TextNode(
+                        "If you have an element that is polling a URL and you want it to stop, use the ",
+                        "Plain",
+                    ),
                     TextNode("htmx.StatusStopPolling", "Code"),
-                    TextNode(" 286 status code in a response to cancel the polling. ", "Plain"),
-                    TextNode("HTMX documentation reference", "Link", "https://htmx.org/docs/#polling"),
-                ]
+                    TextNode(
+                        " 286 status code in a response to cancel the polling. ",
+                        "Plain",
+                    ),
+                    TextNode(
+                        "HTMX documentation reference",
+                        "Link",
+                        "https://htmx.org/docs/#polling",
+                    ),
+                ],
             ),
             (
                 "**S**imple **W**ayland **H**ot**K**ey **D**aemon",
@@ -301,12 +312,80 @@ class TestTextNode(unittest.TestCase):
                     TextNode("ey ", "Plain"),
                     TextNode("D", "Bold"),
                     TextNode("aemon", "Plain"),
-                ]
-            )
+                ],
+            ),
         ]
 
         for input, expected in test_cases:
             actual = text_to_textnodes(input)
+            self.assertEqual(actual, expected)
+
+    def test_markdown_to_blocks(self):
+        test_cases: list[tuple[str, list[str]]] = [
+            (
+                """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+""",
+                [
+                    "This is **bolded** paragraph",
+                    "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+                    "- This is a list\n- with items",
+                ],
+            ),
+            (
+                """
+A picture of you reminds me
+How the years have gone so lonely
+And why do you have to leave me
+Without saying that you love me?
+
+I'm saying "I love you" again
+Are you listening?
+Open your eyes once again
+Look at me crying
+
+If only you could hear me shout your name
+If only you could feel my love again
+The stars in the sky will never be the same
+If only you were here
+""",
+                [
+                    "A picture of you reminds me\nHow the years have gone so lonely\nAnd why do you have to leave me\nWithout saying that you love me?",
+                    "I'm saying \"I love you\" again\nAre you listening?\nOpen your eyes once again\nLook at me crying",
+                    "If only you could hear me shout your name\nIf only you could feel my love again\nThe stars in the sky will never be the same\nIf only you were here",
+                ],
+            ),
+            (
+                """
+# Hypo
+
+
+Hypo is a hyper-fast runtime for [HTML, the programming language](https://html-lang.org).
+
+
+
+
+Run HTML, the programming language code outside of the browser.
+
+## Installation
+""",
+                [
+                    "# Hypo",
+                    "Hypo is a hyper-fast runtime for [HTML, the programming language](https://html-lang.org).",
+                    "Run HTML, the programming language code outside of the browser.",
+                    "## Installation",
+                ],
+            ),
+        ]
+
+        for input, expected in test_cases:
+            actual = markdown_to_blocks(input)
             self.assertEqual(actual, expected)
 
 
