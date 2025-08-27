@@ -163,3 +163,14 @@ def split_nodes_link(old_nodes: Sequence[TextNode]) -> list[TextNode]:
             new_nodes.append(TextNode(text_to_split, "Plain"))
 
     return new_nodes
+
+
+def text_to_textnodes(text: str) -> list[TextNode]:
+    nodes = [TextNode(text, "Plain")]
+    for text_type in ("Bold", "Italic", "Code"):
+        nodes = split_nodes_delimiter(nodes, text_type)
+
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+
+    return nodes

@@ -1,7 +1,14 @@
 from typing import Literal
 import unittest
 
-from textnode import TextNode, split_nodes_delimiter, split_nodes_image, split_nodes_link, text_node_to_html_node
+from textnode import (
+    TextNode,
+    split_nodes_delimiter,
+    split_nodes_image,
+    split_nodes_link,
+    text_node_to_html_node,
+    text_to_textnodes,
+)
 
 
 class TestTextNode(unittest.TestCase):
@@ -99,7 +106,10 @@ class TestTextNode(unittest.TestCase):
                 ],
             ),
             (
-                [TextNode("Meow **meow** meow", "Plain"), TextNode("Purr ** purr ** purr", "Plain")],
+                [
+                    TextNode("Meow **meow** meow", "Plain"),
+                    TextNode("Purr ** purr ** purr", "Plain"),
+                ],
                 "Bold",
                 [
                     TextNode("Meow ", "Plain"),
@@ -111,7 +121,10 @@ class TestTextNode(unittest.TestCase):
                 ],
             ),
             (
-                [TextNode("_italic_ shenanigans", "Plain"), TextNode("this is also _ita_lic", "Plain")],
+                [
+                    TextNode("_italic_ shenanigans", "Plain"),
+                    TextNode("this is also _ita_lic", "Plain"),
+                ],
                 "Italic",
                 [
                     TextNode("italic", "Italic"),
@@ -138,57 +151,45 @@ class TestTextNode(unittest.TestCase):
                 TextNode("This is text with an ", "Plain"),
                 TextNode("image", "Image", "https://i.imgur.com/zjjcJKZ.png"),
                 TextNode(" and another ", "Plain"),
-                TextNode(
-                    "second image", "Image", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second image", "Image", "https://i.imgur.com/3elNhQu.png"),
             ],
             new_nodes,
         )
 
     def test_split_images_2(self):
-        new_nodes = split_nodes_image([
-            TextNode(
-                "![image](https://i.imgur.com/zjjcJKZ.png) ![second image](https://i.imgur.com/3elNhQu.png) ![second image](https://i.imgur.com/3elNhQu.png)",
-                "Plain",
-            ),
-            TextNode(
-                "![image](https://i.imgur.com/zjjcJKZ.png) ![second image](https://i.imgur.com/3elNhQu.png) ![second image](https://i.imgur.com/3elNhQu.png)",
-                "Plain",
-            ),
-            TextNode(
-                "![image](https://i.imgur.com/zjjcJKZ.png) ![second image](https://i.imgur.com/3elNhQu.png) ![second image](https://i.imgur.com/3elNhQu.png)",
-                "Plain",
-            )
-        ])
+        new_nodes = split_nodes_image(
+            [
+                TextNode(
+                    "![image](https://i.imgur.com/zjjcJKZ.png) ![second image](https://i.imgur.com/3elNhQu.png) ![second image](https://i.imgur.com/3elNhQu.png)",
+                    "Plain",
+                ),
+                TextNode(
+                    "![image](https://i.imgur.com/zjjcJKZ.png) ![second image](https://i.imgur.com/3elNhQu.png) ![second image](https://i.imgur.com/3elNhQu.png)",
+                    "Plain",
+                ),
+                TextNode(
+                    "![image](https://i.imgur.com/zjjcJKZ.png) ![second image](https://i.imgur.com/3elNhQu.png) ![second image](https://i.imgur.com/3elNhQu.png)",
+                    "Plain",
+                ),
+            ]
+        )
         self.assertListEqual(
             [
                 TextNode("image", "Image", "https://i.imgur.com/zjjcJKZ.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second image", "Image", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second image", "Image", "https://i.imgur.com/3elNhQu.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second image", "Image", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second image", "Image", "https://i.imgur.com/3elNhQu.png"),
                 TextNode("image", "Image", "https://i.imgur.com/zjjcJKZ.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second image", "Image", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second image", "Image", "https://i.imgur.com/3elNhQu.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second image", "Image", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second image", "Image", "https://i.imgur.com/3elNhQu.png"),
                 TextNode("image", "Image", "https://i.imgur.com/zjjcJKZ.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second image", "Image", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second image", "Image", "https://i.imgur.com/3elNhQu.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second image", "Image", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second image", "Image", "https://i.imgur.com/3elNhQu.png"),
             ],
             new_nodes,
         )
@@ -204,60 +205,109 @@ class TestTextNode(unittest.TestCase):
                 TextNode("This is text with an ", "Plain"),
                 TextNode("link", "Link", "https://i.imgur.com/zjjcJKZ.png"),
                 TextNode(" and another ", "Plain"),
-                TextNode(
-                    "second link", "Link", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second link", "Link", "https://i.imgur.com/3elNhQu.png"),
             ],
             new_nodes,
         )
 
     def test_split_links_2(self):
-        new_nodes = split_nodes_link([
-            TextNode(
-                "[link](https://i.imgur.com/zjjcJKZ.png) [second link](https://i.imgur.com/3elNhQu.png) [second link](https://i.imgur.com/3elNhQu.png)",
-                "Plain",
-            ),
-            TextNode(
-                "[link](https://i.imgur.com/zjjcJKZ.png) [second link](https://i.imgur.com/3elNhQu.png) [second link](https://i.imgur.com/3elNhQu.png)",
-                "Plain",
-            ),
-            TextNode(
-                "[link](https://i.imgur.com/zjjcJKZ.png) [second link](https://i.imgur.com/3elNhQu.png) [second link](https://i.imgur.com/3elNhQu.png)",
-                "Plain",
-            )
-        ])
+        new_nodes = split_nodes_link(
+            [
+                TextNode(
+                    "[link](https://i.imgur.com/zjjcJKZ.png) [second link](https://i.imgur.com/3elNhQu.png) [second link](https://i.imgur.com/3elNhQu.png)",
+                    "Plain",
+                ),
+                TextNode(
+                    "[link](https://i.imgur.com/zjjcJKZ.png) [second link](https://i.imgur.com/3elNhQu.png) [second link](https://i.imgur.com/3elNhQu.png)",
+                    "Plain",
+                ),
+                TextNode(
+                    "[link](https://i.imgur.com/zjjcJKZ.png) [second link](https://i.imgur.com/3elNhQu.png) [second link](https://i.imgur.com/3elNhQu.png)",
+                    "Plain",
+                ),
+            ]
+        )
         self.assertListEqual(
             [
                 TextNode("link", "Link", "https://i.imgur.com/zjjcJKZ.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second link", "Link", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second link", "Link", "https://i.imgur.com/3elNhQu.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second link", "Link", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second link", "Link", "https://i.imgur.com/3elNhQu.png"),
                 TextNode("link", "Link", "https://i.imgur.com/zjjcJKZ.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second link", "Link", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second link", "Link", "https://i.imgur.com/3elNhQu.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second link", "Link", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second link", "Link", "https://i.imgur.com/3elNhQu.png"),
                 TextNode("link", "Link", "https://i.imgur.com/zjjcJKZ.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second link", "Link", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second link", "Link", "https://i.imgur.com/3elNhQu.png"),
                 TextNode(" ", "Plain"),
-                TextNode(
-                    "second link", "Link", "https://i.imgur.com/3elNhQu.png"
-                ),
+                TextNode("second link", "Link", "https://i.imgur.com/3elNhQu.png"),
             ],
             new_nodes,
         )
+
+    def test_text_to_textnodes(self):
+        test_cases: list[tuple[str, list[TextNode]]] = [
+            (
+                "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)",
+                [
+                    TextNode("This is ", "Plain"),
+                    TextNode("text", "Bold"),
+                    TextNode(" with an ", "Plain"),
+                    TextNode("italic", "Italic"),
+                    TextNode(" word and a ", "Plain"),
+                    TextNode("code block", "Code"),
+                    TextNode(" and an ", "Plain"),
+                    TextNode(
+                        "obi wan image", "Image", "https://i.imgur.com/fJRm4Vk.jpeg"
+                    ),
+                    TextNode(" and a ", "Plain"),
+                    TextNode("link", "Link", "https://boot.dev"),
+                ],
+            ),
+            (
+                "Uses standard `net/http` types. Has basic [integration](#templ-integration) with [templ](https://templ.guide/) components.",
+                [
+                    TextNode("Uses standard ", "Plain"),
+                    TextNode("net/http", "Code"),
+                    TextNode(" types. Has basic ", "Plain"),
+                    TextNode("integration", "Link", "#templ-integration"),
+                    TextNode(" with ", "Plain"),
+                    TextNode("templ", "Link", "https://templ.guide/"),
+                    TextNode(" components.", "Plain"),
+                ]
+            ),
+            (
+                "If you have an element that is polling a URL and you want it to stop, use the `htmx.StatusStopPolling` 286 status code in a response to cancel the polling. [HTMX documentation reference](https://htmx.org/docs/#polling)",
+                [
+                    TextNode("If you have an element that is polling a URL and you want it to stop, use the ", "Plain"),
+                    TextNode("htmx.StatusStopPolling", "Code"),
+                    TextNode(" 286 status code in a response to cancel the polling. ", "Plain"),
+                    TextNode("HTMX documentation reference", "Link", "https://htmx.org/docs/#polling"),
+                ]
+            ),
+            (
+                "**S**imple **W**ayland **H**ot**K**ey **D**aemon",
+                [
+                    TextNode("S", "Bold"),
+                    TextNode("imple ", "Plain"),
+                    TextNode("W", "Bold"),
+                    TextNode("ayland ", "Plain"),
+                    TextNode("H", "Bold"),
+                    TextNode("ot", "Plain"),
+                    TextNode("K", "Bold"),
+                    TextNode("ey ", "Plain"),
+                    TextNode("D", "Bold"),
+                    TextNode("aemon", "Plain"),
+                ]
+            )
+        ]
+
+        for input, expected in test_cases:
+            actual = text_to_textnodes(input)
+            self.assertEqual(actual, expected)
 
 
 if __name__ == "__main__":
