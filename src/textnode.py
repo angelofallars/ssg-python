@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Literal, override
 
 from htmlnode import HTMLNode, LeafNode
+from text import extract_markdown_images, extract_markdown_links, image_re
 
 
 type TextType = Literal["Plain", "Bold", "Italic", "Code", "Link", "Image"]
@@ -106,5 +107,59 @@ def split_nodes_delimiter(
 
         if len(text_so_far) != 0:
             new_nodes.append(TextNode(text_so_far, "Plain"))
+
+    return new_nodes
+
+def split_nodes_image(old_nodes: Sequence[TextNode]) -> list[TextNode]:
+    new_nodes = list[TextNode]()
+    for node in old_nodes:
+        if node.text_type != "Plain":
+            new_nodes.append(node)
+            continue
+
+        images = extract_markdown_images(node.text)
+
+        if len(images) == 0:
+            new_nodes.append(node)
+            continue
+
+        text_to_split = node.text
+        for alt, url in images:
+            left_text, text_to_split = text_to_split.split(f"![{alt}]({url})", 1)
+
+            if left_text != "":
+                new_nodes.append(TextNode(left_text, "Plain"))
+
+            new_nodes.append(TextNode(alt, "Image", url))
+
+        if text_to_split != "":
+            new_nodes.append(TextNode(text_to_split, "Plain"))
+
+    return new_nodes
+
+def split_nodes_link(old_nodes: Sequence[TextNode]) -> list[TextNode]:
+    new_nodes = list[TextNode]()
+    for node in old_nodes:
+        if node.text_type != "Plain":
+            new_nodes.append(node)
+            continue
+
+        links = extract_markdown_links(node.text)
+
+        if len(links) == 0:
+            new_nodes.append(node)
+            continue
+
+        text_to_split = node.text
+        for alt, url in links:
+            left_text, text_to_split = text_to_split.split(f"[{alt}]({url})", 1)
+
+            if left_text != "":
+                new_nodes.append(TextNode(left_text, "Plain"))
+
+            new_nodes.append(TextNode(alt, "Link", url))
+
+        if text_to_split != "":
+            new_nodes.append(TextNode(text_to_split, "Plain"))
 
     return new_nodes
