@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Literal, override
 
 from htmlnode import HTMLNode, LeafNode
-from text import extract_markdown_images, extract_markdown_links, image_re
+from text import extract_markdown_images, extract_markdown_links
 
 
 type TextType = Literal["Plain", "Bold", "Italic", "Code", "Link", "Image"]
@@ -174,11 +174,3 @@ def text_to_textnodes(text: str) -> list[TextNode]:
     nodes = split_nodes_link(nodes)
 
     return nodes
-
-def markdown_to_blocks(markdown: str) -> list[str]:
-    lines = markdown.split("\n\n")
-    lines = map(lambda line: line.strip(), lines)
-    lines = filter(lambda line: line != "", lines)
-    lines = list(lines)
-
-    return lines
