@@ -56,7 +56,13 @@ class LeafNode(HTMLNode):
             msg = f"Leaf node '{self}' has no value"
             raise ValueError(msg)
 
-        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+        start_tag = ""
+        end_tag = ""
+        if self.tag is not None:
+            start_tag = f"<{self.tag}{self.props_to_html()}>"
+            end_tag = f"</{self.tag}>"
+
+        return f"{start_tag}{self.value}{end_tag}"
 
 
 class ParentNode(HTMLNode):
