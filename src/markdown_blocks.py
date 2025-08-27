@@ -19,26 +19,11 @@ def block_to_block_type(block: str) -> BlockType:
     lines = block.split("\n")
 
     # Heading
-    if len(lines) == 1:
-        first_line = lines[0]
-        first_words = first_line.split(" ")
-
-        is_header = True
-        char_count = 0
-        for char in first_words[0]:
-            char_count += 1
-            if char != "#" or char_count > 6:
-                is_header = False
-                break
-
-        if char_count == 0:
-            is_header = False
-
-        if is_header:
-            return "Heading"
+    if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
+        return "Heading"
 
     # Code
-    if block.startswith("```") and block.endswith("```"):
+    if len(lines) > 1 and lines[0].startswith("```") and lines[-1].startswith("```"):
         return "Code"
 
     # Quote
