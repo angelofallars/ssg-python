@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal, override
 
@@ -57,3 +58,53 @@ def text_node_to_html_node(text_node: TextNode) -> HTMLNode:
                 value="",
                 props={"href": text_node.url, "alt": text_node.text},
             )
+
+
+def split_nodes_delimiter(
+    old_nodes: Sequence[TextNode], text_type: Literal["Bold", "Italic", "Code"]
+) -> list[TextNode]:
+    delimiter: str
+    match text_type:
+        case "Bold":
+            delimiter = "**"
+        case "Italic":
+            delimiter = "_"
+        case "Code":
+            delimiter = "`"
+
+    new_nodes = list[TextNode]()
+    for node in old_nodes:
+        if node.text_type != "Plain":
+            new_nodes.append(node)
+            continue
+
+        last = ""
+        text_so_far = ""
+        start_delimiter = False
+        for char in node.text:
+            is_delimiter = (last + char).endswith(delimiter)
+            if is_delimiter:
+                # Hacky hack hack for bold
+                if len(delimiter) == 2:
+                    text_so_far = text_so_far[:-1]
+
+                if not start_delimiter:
+                    start_delimiter = True
+                    if len(text_so_far) != 0:
+                        new_nodes.append(TextNode(text_so_far, "Plain"))
+                        text_so_far = ""
+                else:
+                    start_delimiter = False
+                    new_nodes.append(TextNode(text_so_far, text_type))
+                    text_so_far = ""
+            else:
+                text_so_far += char
+
+            last = char
+
+        # Not raising an error on not finding a closing delimiter
+
+        if len(text_so_far) != 0:
+            new_nodes.append(TextNode(text_so_far, "Plain"))
+
+    return new_nodes

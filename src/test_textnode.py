@@ -1,6 +1,7 @@
+from typing import Literal
 import unittest
 
-from textnode import TextNode, text_node_to_html_node
+from textnode import TextNode, split_nodes_delimiter, text_node_to_html_node
 
 
 class TestTextNode(unittest.TestCase):
@@ -83,6 +84,48 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(
             html_node.props, {"href": "public/cat.png", "alt": "This is an image node"}
         )
+
+    def test_split_nodes_delimiter(self):
+        test_cases: list[
+            tuple[list[TextNode], Literal["Bold", "Italic", "Code"], list[TextNode]]
+        ] = [
+            (
+                [TextNode("This is text with a `code block` word", "Plain")],
+                "Code",
+                [
+                    TextNode("This is text with a ", "Plain"),
+                    TextNode("code block", "Code"),
+                    TextNode(" word", "Plain"),
+                ],
+            ),
+            (
+                [TextNode("Meow **meow** meow", "Plain"), TextNode("Purr ** purr ** purr", "Plain")],
+                "Bold",
+                [
+                    TextNode("Meow ", "Plain"),
+                    TextNode("meow", "Bold"),
+                    TextNode(" meow", "Plain"),
+                    TextNode("Purr ", "Plain"),
+                    TextNode(" purr ", "Bold"),
+                    TextNode(" purr", "Plain"),
+                ],
+            ),
+            (
+                [TextNode("_italic_ shenanigans", "Plain"), TextNode("this is also _ita_lic", "Plain")],
+                "Italic",
+                [
+                    TextNode("italic", "Italic"),
+                    TextNode(" shenanigans", "Plain"),
+                    TextNode("this is also ", "Plain"),
+                    TextNode("ita", "Italic"),
+                    TextNode("lic", "Plain"),
+                ],
+            ),
+        ]
+
+        for input, text_type, expected in test_cases:
+            actual = split_nodes_delimiter(input, text_type)
+            self.assertEqual(actual, expected)
 
 
 if __name__ == "__main__":
