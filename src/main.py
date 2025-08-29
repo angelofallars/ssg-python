@@ -1,9 +1,23 @@
-from textnode import TextNode
+import os
+import shutil
 
+from file import copy_dir
+from page import generate_page
+
+
+SRC_PATH = "static/"
+TEMPLATE_PATH = "template.html"
+DEST_PATH = "public/"
 
 def main():
-    text_node = TextNode("I'm just a kid", "Plain", None)
-    print(text_node)
+    # Delete all contents of dest
+    if os.path.exists(DEST_PATH):
+        shutil.rmtree(DEST_PATH)
+
+    copy_dir(SRC_PATH, DEST_PATH)
+
+    generate_page("content/index.md", TEMPLATE_PATH, os.path.join(DEST_PATH, "index.html"))
+    
 
 if __name__ == "__main__":
     main()

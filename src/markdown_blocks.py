@@ -27,7 +27,13 @@ def block_to_block_type(block: str) -> BlockType:
         return "Code"
 
     # Quote
-    is_quote = all(map(lambda line: line.startswith("> "), lines))
+    is_quote = True
+    for line in lines:
+        words = line.split(" ")
+        if len(words) == 0 or words[0] != ">":
+            is_quote = False
+            break
+
     if is_quote:
         return "Quote"
 

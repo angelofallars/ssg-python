@@ -1,6 +1,7 @@
+from typing import Literal
 import unittest
 
-from markdown import markdown_to_html_node
+from markdown import extract_title, markdown_to_html_node
 
 
 class TestMarkdown(unittest.TestCase):
@@ -50,7 +51,7 @@ Has basic [integration](#templ-integration) with [templ](https://templ.guide/) c
         html = node.to_html()
         self.assertEqual(
             html,
-            """<div><p>Write <a href="#triggers">triggers</a> for client-side events effectively without dealing with JSON serialization. With this approach, <b>event-driven</b> applications are easier to develop.</p><p>Use <a href="#swap-strategy">Swap Strategy</a> methods to fine-tune <code>hx-swap</code> behavior.</p><p>Uses standard <code>net/http</code> types. Has basic <a href="#templ-integration">integration</a> with <a href="https://templ.guide/">templ</a> components.</p></div>"""
+            """<div><p>Write <a href="#triggers">triggers</a> for client-side events effectively without dealing with JSON serialization. With this approach, <b>event-driven</b> applications are easier to develop.</p><p>Use <a href="#swap-strategy">Swap Strategy</a> methods to fine-tune <code>hx-swap</code> behavior.</p><p>Uses standard <code>net/http</code> types. Has basic <a href="#templ-integration">integration</a> with <a href="https://templ.guide/">templ</a> components.</p></div>""",
         )
 
     def test_headers_simple(self):
@@ -65,10 +66,7 @@ Has basic [integration](#templ-integration) with [templ](https://templ.guide/) c
         node = markdown_to_html_node(md)
         html = node.to_html()
         self.maxDiff = None
-        self.assertEqual(
-            html,
-            '<div><h1>H1</h1><h2>H2</h2><h3>H3</h3></div>'
-        )
+        self.assertEqual(html, "<div><h1>H1</h1><h2>H2</h2><h3>H3</h3></div>")
 
     def test_headers(self):
         md = """
@@ -90,7 +88,7 @@ Pull requests are welcome!
         self.maxDiff = None
         self.assertEqual(
             html,
-            '<div><h2>Additional resources</h2><ul><li><a href="https://htmx.org/reference/#headers">HTMX - HTTP Header Reference</a></li></ul><h3>Contributing</h3><p>Pull requests are welcome!</p><h4>License</h4><p><a href="./LICENSE">MIT</a></p></div>'
+            '<div><h2>Additional resources</h2><ul><li><a href="https://htmx.org/reference/#headers">HTMX - HTTP Header Reference</a></li></ul><h3>Contributing</h3><p>Pull requests are welcome!</p><h4>License</h4><p><a href="./LICENSE">MIT</a></p></div>',
         )
 
     def test_quote(self):
@@ -102,10 +100,7 @@ Pull requests are welcome!
 
         node = markdown_to_html_node(md)
         html = node.to_html()
-        self.assertEqual(
-            html,
-            "<div><blockquote>One Two Three</blockquote></div>"
-        )
+        self.assertEqual(html, "<div><blockquote>One Two Three</blockquote></div>")
 
     def test_quote_with_child_nodes(self):
         md = """
@@ -118,7 +113,7 @@ Pull requests are welcome!
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><blockquote><b>One</b> <i>Two</i> Three <code>Three</code></blockquote></div>"
+            "<div><blockquote><b>One</b> <i>Two</i> Three <code>Three</code></blockquote></div>",
         )
 
     def test_ordered_list(self):
@@ -139,8 +134,37 @@ Pull requests are welcome!
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><ol><li>One</li><li>Two</li><li>Three</li><li>Four</li><li>Five</li><li>Six</li><li>Seven</li><li>Eight</li><li>Nine</li><li>Ten</li></ol></div>"
+            "<div><ol><li>One</li><li>Two</li><li>Three</li><li>Four</li><li>Five</li><li>Six</li><li>Seven</li><li>Eight</li><li>Nine</li><li>Ten</li></ol></div>",
         )
+
+    def test_extract_title(self):
+        test_cases: list[tuple[str, str | None]] = [
+            ("# Hello", "Hello"),
+            ("## H2\n# H1", "H1"),
+            ("## H2\n#       Lots of whitespace    ", "Lots of whitespace"),
+            ("# ", ""),
+            ("## No H1", None),
+            ("", None),
+            ("### H3\n#### H4", None),
+        ]
+
+        for markdown, expected in test_cases:
+            should_raise_exception = expected is None
+
+            try:
+                actual = extract_title(markdown)
+            except Exception as e:
+                if not should_raise_exception:
+                    e.add_note("Unexpected exception")
+                    raise e
+            else:
+                if should_raise_exception:
+                    msg = f"Exception expected with input: '{markdown}'"
+                    raise AssertionError(msg)
+
+                self.assertEqual(actual, expected)
+
+
 
 if __name__ == "__main__":
     unittest.main()
