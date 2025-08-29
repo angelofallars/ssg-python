@@ -14,7 +14,6 @@ def generate_pages_recursive(
 
         src_file_path = os.path.join(dir_path_content, dir_file)
         dest_file_path = os.path.join(dest_dir_path, dir_file[:-3] + ".html")
-        breakpoint()
 
         generate_page(src_file_path, template_path, dest_file_path)
 
