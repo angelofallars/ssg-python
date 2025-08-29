@@ -2,7 +2,7 @@ import os
 import shutil
 
 from file import copy_dir
-from page import generate_page
+from page import generate_pages_recursive
 
 
 SRC_PATH = "static/"
@@ -16,7 +16,7 @@ def main():
 
     copy_dir(SRC_PATH, DEST_PATH)
 
-    generate_page("content/index.md", TEMPLATE_PATH, os.path.join(DEST_PATH, "index.html"))
+    generate_pages_recursive("content/", TEMPLATE_PATH, "public/")
     
 
 if __name__ == "__main__":

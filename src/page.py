@@ -1,5 +1,22 @@
 import os
+from file import list_tree
 from markdown import extract_title, markdown_to_html_node
+
+
+def generate_pages_recursive(
+    dir_path_content: str, template_path: str, dest_dir_path: str
+): 
+    dir_files, _ = list_tree(dir_path_content, dir_path_content)
+
+    for dir_file in dir_files:
+        if not dir_file.endswith(".md"):
+            continue
+
+        src_file_path = os.path.join(dir_path_content, dir_file)
+        dest_file_path = os.path.join(dest_dir_path, dir_file[:-3] + ".html")
+        breakpoint()
+
+        generate_page(src_file_path, template_path, dest_file_path)
 
 
 def generate_page(from_path: str, template_path: str, dest_path: str):

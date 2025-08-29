@@ -7,7 +7,7 @@ def copy_dir(src: str, dest: str):
         msg = f"Path does not exist: {src}"
         raise Exception(msg)
 
-    files, directories = _list_tree(src, src)
+    files, directories = list_tree(src, src)
 
     # Copy all files and subdirs, nested files/subdirs
     os.mkdir(dest)
@@ -21,7 +21,7 @@ def copy_dir(src: str, dest: str):
         _ = shutil.copy(old_file, new_file)
 
 
-def _list_tree(src: str, prefix: str) -> tuple[list[str], list[str]]:
+def list_tree(src: str, prefix: str) -> tuple[list[str], list[str]]:
     files: list[str] = []
     directories: list[str] = []
 
@@ -33,7 +33,7 @@ def _list_tree(src: str, prefix: str) -> tuple[list[str], list[str]]:
             files.append(rel_path)
         else:
             directories.append(rel_path)
-            child_files, child_directories = _list_tree(full_path, prefix)
+            child_files, child_directories = list_tree(full_path, prefix)
             files.extend(child_files)
             files.extend(child_directories)
 
