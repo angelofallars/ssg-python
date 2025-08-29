@@ -4,8 +4,8 @@ from markdown import extract_title, markdown_to_html_node
 
 
 def generate_pages_recursive(
-    dir_path_content: str, template_path: str, dest_dir_path: str
-): 
+    dir_path_content: str, template_path: str, dest_dir_path: str, base_path: str
+):
     dir_files, _ = list_tree(dir_path_content, dir_path_content)
 
     for dir_file in dir_files:
@@ -15,10 +15,10 @@ def generate_pages_recursive(
         src_file_path = os.path.join(dir_path_content, dir_file)
         dest_file_path = os.path.join(dest_dir_path, dir_file[:-3] + ".html")
 
-        generate_page(src_file_path, template_path, dest_file_path)
+        generate_page(src_file_path, template_path, dest_file_path, base_path)
 
 
-def generate_page(from_path: str, template_path: str, dest_path: str):
+def generate_page(from_path: str, template_path: str, dest_path: str, base_path: str):
     print(
         f"Generating page from '{from_path}' to '{dest_path}' using '{template_path}'"
     )
@@ -32,8 +32,11 @@ def generate_page(from_path: str, template_path: str, dest_path: str):
     content = markdown_to_html_node(markdown).to_html()
     title = extract_title(markdown)
 
-    finished_html = template.replace("{{ Title }}", title).replace(
-        "{{ Content }}", content
+    finished_html = (
+        template.replace("{{ Title }}", title)
+        .replace("{{ Content }}", content)
+        .replace('href="/', f'href="{base_path}')
+        .replace('src="/', f'src="{base_path}')
     )
 
     dir, _ = os.path.split(dest_path)
